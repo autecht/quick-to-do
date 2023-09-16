@@ -1,5 +1,5 @@
-// TODO: add options for list,  increase date formats
-// TODO: fix bugs - no label searching, weird things will happen if $ used
+// TODO: add options for list, increase date formats
+// TODO: fix bugs - no label searching
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -133,7 +133,7 @@ class Modify implements Runnable {
     @Parameters(paramLabel = "<label>", arity = "1..*", description = "Label of task to be modified")
     String[] label;
 
-    @Option(names = {"--label", "-l"}, arity = "1..*", description = "New label to be changed to")
+    @Option(names = {"--label", "-l", "--new-label"}, arity = "1..*", description = "New label to be changed to")
     String[] newLabel;
 
     @Option(names={"--tag"}, description = "Tag of modified task")
