@@ -18,7 +18,7 @@ public class Task {
 
     /*
      * creates new task from line representing entire task in format
-     * label$due$priority$tag$description
+     * label#due#priority#tag#description
      */
     Task(String taskLine) {
         String[] sections = getSections(taskLine);
@@ -39,10 +39,11 @@ public class Task {
     }
 
     /*
-     * throws error if date is not in format mm/dd/yyyy
+     * Retruns date in format mm/dd/yyyy
+     * throws error if date cannot be read
      */
-    static void checkDate(String date) {
-        if (date.equals("")) return;
+    static String convertToDate(String date) {
+        if (date.equals("") || date == null) return "";
         if (date.length() != 10) throwDateException();
         for (int i = 0; i < 10; i++) {
             char curr = date.charAt(i);
@@ -51,6 +52,7 @@ public class Task {
             }
             else if ((curr < 48) || (curr > 57)) throwDateException();
         }
+        return date;
     }
 
     static void throwDateException() {
@@ -122,22 +124,22 @@ public class Task {
     }
 
     /*
-     * returns String that is representation of task in format label$due$priority$tag$description
+     * returns String that is representation of task in format label#due#priority#tag#description
      */
     public String toLine() {
-        return this.label + "$" + this.due + "$" + this.priority + "$" + this.tag + "$" + this.description;
+        return this.label + "#" + this.due + "#" + this.priority + "#" + this.tag + "#" + this.description;
     }
 
     /*
      * returns the 0-indexed sectionNumberth section of task represente by line, where line is
-     * formatted as label$due$priority$tag$description
+     * formatted as label#due#priority#tag#description
      */
     static String getSection(String line, int sectionNumber) {
         return getSections(line)[sectionNumber];
     }
 
     /*
-     * Splits line formatted as label$due$priority$tag$description into String array
+     * Splits line formatted as label#due#priority#tag#description into String array
      * of length 4 
      *
      * returns String {label, due, priority, tag, description}
@@ -147,7 +149,7 @@ public class Task {
         int pos = 0;
         for (int i = 0; i < 5; i++) {
             char c;
-            while (pos < line.length() && (c = line.charAt(pos)) != '$') {
+            while (pos < line.length() && (c = line.charAt(pos)) != '#') {
                 result[i] += c;
                 pos++;
             }
@@ -176,10 +178,10 @@ public class Task {
     public String toString() {
         String whitespace = "     ";
         String newLine = "\n";
-        String result = String.format("Task:%s", this.label);
+        String result = String.format("Task: %s", this.label);
         if (!this.due.equals("")) result += newLine + whitespace + "Due: " + this.due;
         if (!this.priority.equals("")) result += newLine + whitespace + "Priority: " + this.priority;
-        if (!this.tag.equals("")) result += newLine + whitespace + "tag: " + this.tag;
+        if (!this.tag.equals("")) result += newLine + whitespace + "Tag: " + this.tag;
         if (!this.description.equals("")) result += newLine + whitespace + "Description: " + this.description; // TODO: should include newlines in description
         return result;
     }

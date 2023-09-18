@@ -11,8 +11,8 @@ import picocli.CommandLine.Parameters;
 @Command(subcommands = {Add.class, List.class, Remove.class, Modify.class}, name = "qdo", version = "qdo 1.0", mixinStandardHelpOptions = true)
 public class Qdo{
     static final String fileName = "tasks.txt";
-    static final char delimeter = '$';
-    static final String delimeterString = "$";
+    static final char delimeter = '#';
+    static final String delimeterString = "#";
 
     public static void main(String[] args) throws Exception {
         
@@ -54,8 +54,8 @@ class Add implements Runnable {
         // deal with nulls and check date
         if (priority == null) priority = "";
         if (due == null) due = "";
-        Task.checkDate(due);
-        writeTask(Task.convertToString(label), due, priority,
+        String date = Task.convertToDate(due);
+        writeTask(Task.convertToString(label), date, priority,
             Task.convertToString(tag), 
             Task.convertToString(description));
     }
@@ -86,21 +86,56 @@ class Add implements Runnable {
 
 @Command(name = "list", mixinStandardHelpOptions= true, description = "List tasks currently on to-do list")
 class List implements Runnable {
-	
+
+	@Option(names = {"--due, --due-by"}, description = "Date by which tasks listed are due, in mm/dd/yyyy format")
+    String due;
+
+    @Option(names = {"--priority"}, description = "Minimum priority of tasks listed")
+    String prioirity;
+
+    @Option(names = {"--tag"}, arity = "1..*", description = "Tag of tasks listed")
+    String[] tag;
+
+    @Option(names = {"--no-tag"}, arity = "0", description = "List only tasks with no tag")
+    boolean noTag;
+
+    @Option(names = {"--label"}, arity = "1..*", description = "Label of task to be listed")
+    String[] label;
+
+
 	@Override
     public void run() {
-        listAll();
+        String tagArgument = Task.convertToString(tag);
+        if (noTag) tagArgument = null;
+        list(Task.convertToString(label),Task.convertToDate(due),prioirity,tagArgument);
     }
 
+    
+
     /*
-     * List all tasks in file
+     * @param label: If label is not empty, only list task with label (or all tasks if empty)
+     * @param date: Only list tasks with a due date before or equal to the given date (all tasks if empty)
+     * @param priority: Only list tasks with a priority greater than or equal to the given priority (all tasks if empty or null)
+     * @param tag: If not null, only list tasks with the given tag
+     *
+     * Lists tasks in "tasks.txt" based on arguments given
      */
-    static void listAll() {
+    static void list(String label, String date, String priority, String tag) {
         FileNavigator fn = new FileNavigator(Qdo.fileName);
         for (String line: fn.lines) {
-            Task t = new Task(line);
-            System.out.println(t);
+            Task currentTask = new Task(line);
+            if (!label.equals("")) {
+                if (!currentTask.label.equals(label)) continue;
+            }
+            if (Task.compareDates(currentTask.due, date) < 0) break;
+            if (Task.comparePriorities(currentTask.priority, priority) < 0) continue;
+            if (tag != null){
+                if (tag.equals(currentTask.tag)) System.out.println(currentTask);
+            }
+            else System.out.println(currentTask);
+            
         }
+        fn.close();
     }
 
 }
