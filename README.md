@@ -18,7 +18,7 @@ the `--priority` flag to change the priority level of the task, the `--tag` flag
 of the task, and the `--description` flag to change the description of the task.
 ## Future Features
 I plan on:
-- Expanding the `list` subcommand flags to allow for listing of only tasks with specific features
 - Allowing the user to input the date with more formats
+- Detecting the current date to color tasks that are due or past due
 - Implementing an autocomplete function so that the user does not need to type the entire label for the 
     `list` and `remove` subcommands.
