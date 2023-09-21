@@ -26,26 +26,71 @@ public class QdoTest {
         File toDelete = new File("tasks.txt");
         toDelete.delete();
         // label#date#time#priority#tag#descritpion
+        // lines as they should appear in file
+        // H = high, L = low, N = low, D = date, T = time, P = priority
         line1 = "HDHTHP#01/01/1001#00:00#10##";
-        line2 = "HDLTHP#01/01/1001#20:00#10##";
-        line3 = "HDNTHP#01/01/1001#23:59#10##";
-    }
+        line2 = "HDHTNP#01/01/1001#00:00###";
+        line3 = "HDLTHP#01/01/1001#20:00#10##";
+        line4 = "HDNTHP#01/01/1001#23:59#10##";
+        line5 = "LDHTHP#01/01/3001#00:00#10##";
+        line6 = "NDNTNP####A tag#A description"; 
 
-    @Before
-    public void setupTasks() {
-        File testFile = new File("tasks.txt");
-        testFile.delete();
+        task1 = new Task(line1);
+        task2 = new Task(line2);
+        task3 = new Task(line3);
+        task4 = new Task(line4);
+        task5 = new Task(line5);
+        task6 = new Task(line6);
 
+        // insert tasks in mixed order
+        String[] label;
+        String[] due;
+        String priority;
+        String[] tag;
+        String[] description;
+
+        label = new String[] {"HDLTHP"};
+        due = new String[] {"01/01/1001", "20:00"};
+        priority = "10";
+        tag = null;
+        description = null;
+        writeTask(label, due, priority, tag, description); //line3 = "HDLTHP#01/01/1001#20:00#10##";
+
+        label = new String[] {"LDHTHP"};
+        due = new String[] {"01/01/3001", "00:00"};
+        priority = "10";
+        tag = null;
+        description = null;
+        writeTask(label, due, priority, tag, description); //line5 = "LDHTHP#01/01/3001#00:00#10##";
+
+        label = new String[] {"HDHTHP"};
+        due = new String[] {"01/01/1001", "00:00"};
+        priority = "10";
+        tag = null;
+        description = null;
+        writeTask(label, due, priority, tag, description); // line1 = "HDHTHP#01/01/1001#00:00#10##";
+
+        label = new String[] {"HDHTNP"};
+        due = new String[] {"01/01/1001", "00:00"};
+        priority = null;
+        tag = null;
+        description = null;
+        writeTask(label, due, priority, tag, description); // line2 = "HDHTNP#01/01/1001#00:00###";
+
+        label = new String[] {"NDNTNP"};
+        due = null;
+        priority = null;
+        tag = new String[] {"A", "tag"};
+        description = new String[] {"A", "description"};
+        writeTask(label, due, priority, tag, description); // line6 = "NDNTNP####A tag#A description"; 
+
+        label = new String[] {"HDNTHP"};
+        due = new String[] {"01/01/1001"};
+        priority = "10";
+        tag = null;
+        description = null;
+        writeTask(label, due, priority, tag, description); // line4 = "HDNTHP#01/01/1001#23:59#10##";
         
-
-        writeTask(new Task(task6));
-        writeTask(new Task(task4));
-        writeTask(new Task(task1));
-        writeTask(new Task(task7));
-        writeTask(new Task(task3));
-        writeTask(new Task(task5));
-        writeTask(new Task(task8));
-        writeTask(new Task(task2));
     }
 
     @Before
@@ -54,7 +99,142 @@ public class QdoTest {
     
     }
 
+    @Test
+    public void testAdd() {
+        String expected = line1 + "\n" + line2 + "\n" + line3 + "\n" 
+                + line4 + "\n" + line5 + "\n" + line6 + "\n";
+        String result = readFile("tasks.txt");
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testList() {
+        String[] label;
+        String[] due;
+        String priority;
+        String[] tag;
+        String[] description;
+
+        label = null;
+        due = null;
+        priority = null;
+        tag = null;
+        description = null;
+        listTasks(label, due, priority, tag, description);
+        String result = outputStream.toString();
+        String expected = line1 + newline + line2 + newline + line3 + newline 
+                + line4 + newline + line5 + newline + line6 + newline;
+        assertEquals(expected, result);
+
+        // test due, priority
+        label = null;
+        due = new String[] {"01/01/1001", "20:00"};
+        priority = "10";
+        tag = null;
+        description = null;
+        listTasks(label, due, priority, tag, description);
+        result = outputStream.toString();
+        expected += line1 + newline + line3 + newline;
+        assertEquals(expected, result);
+
+        // test tag
+        label = null;
+        due = null;
+        priority = null;
+        tag = new String[] {};
+        description = null;
+        listTasks(label, due, priority, tag, description);
+        result = outputStream.toString();
+        expected += line6 + newline;
+        assertEquals(expected, result);
+
+        // test label
+        label = new String[] {"HDNTHP"};
+        due = null;
+        priority = null;
+        tag = null;
+        description = null;
+        listTasks(label, due, priority, tag, description);
+        result = outputStream.toString();
+        expected += line4 + newline;
+        assertEquals(expected, result);
+    }
+
+
+    @Test
+    public void testRemove() {
+        removeTask(new String[] {"HDHTHP"}); // first task
+        removeTask(new String[] {"HDLTHP"}); // middle task
+        removeTask(new String[] {"NDNTNP"}); // last task
+
+        String result = readFile("tasks.txt");
+        String expected = line2 + "\n" + line4 + "\n" + line5 + "\n";
+        assertEquals(expected, result);
+        
+        this.setupTest();
+    }
+
+    @Test
+    public void testModify() {
+        line1 = "HDHTHP#01/01/1001#00:00#10##";
+        line2 = "HDHTNP#01/01/1001#00:00###";
+        line3 = "HDLTHP#01/01/1001#20:00#10##";
+        line4 = "HDNTHP#01/01/1001#23:59#10##";
+        line5 = "LDHTHP#01/01/3001#00:00#10##";
+        line6 = "NDNTNP####A tag#A description"; 
+
+
+        String[] label;
+        String[] newLabel;
+        String[] due;
+        String priority;
+        String[] tag;
+        String[] description;
+
+        // test changing features, including removing and adding
+        String newLine6 = "MDMTMP#01/01/1050#12:00#5##";
+        label = new String[] {"NDNTNP"};
+        newLabel = new String[]{"MDMTMP"};
+        due = new String[]{"01/01/1050", "12:00"};
+        priority = "5";
+        tag = new String[]{};
+        description = new String[] {};
+
+        String expected = line1 + "\n" + line2 + "\n" + line3 + "\n" 
+                + line4 + "\n" + newLine6 + "\n" + line5  + "\n";
+        String result = readFile("tasks.txt");
+        assertEquals(expected, result);
+
+        // test changing description, keeping other features the same
+        String newLine1 = "HDHTHP#01/01/1001#00:00#10##Added description";
+
+        label = new String[] {"HDHTHP"};
+        newLabel = null;
+        due = null;
+        priority = null;
+        tag = null;
+        description = new String[] {"Added", "description"};
+
+        expected = newLine1 + "\n" + line2 + "\n" + line3 + "\n" 
+                + line4 + "\n" + newLine6 + "\n" + line5  + "\n";
+        result = readFile("tasks.txt");
+        assertEquals(expected, result);
+
+        
+        this.setupTest();
     
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     @After
     public void close() throws IOException {
@@ -94,9 +274,23 @@ public class QdoTest {
         }
     }
 
-    public static void writeTask(Task t) {
-        Add.writeTask(t.label, t.due, t.priority, t.tag, t.description);
+    public static void writeTask(String[] label, String[] due, String priority, String[] tag, String[] description) {
+        Add.writeTask(label, due, priority, tag, description);
     }
+
+    public static void listTasks(String[] label, String[] due, String priority, String[] tag, String[] description) {
+        List.listTasks(label, due, priority, tag, description);
+    }
+
+    public static void removeTask(String[] label) {
+        Remove.removeTask(label);
+    }
+
+    public static void modifyTask(String[] label, String[] newLabel, String[] due, String priority, String[] tag, String[] description) {
+        Modify.modifyTask(label, newLabel, due, priority, tag, description);
+    }
+
+
 
     
 }
