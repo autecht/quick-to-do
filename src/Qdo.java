@@ -4,6 +4,8 @@
 import java.io.File;
 import java.util.Scanner;
 
+import com.oracle.graal.compiler.enterprise.phases.strings.r;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -95,16 +97,17 @@ class Add implements Runnable {
 @Command(name = "list", mixinStandardHelpOptions= true, description = "List tasks currently on to-do list")
 class List implements Runnable {
 
-	@Option(names = {"--due, --due-by"}, description = "Date by which tasks listed are due, in mm/dd/yyyy format")
-    String due;
+	@Option(names = {"--due, --due-by"}, arity = "0..*",
+            description = "Date and, optionally, time by which tasks listed are due, in mm/dd/yyyy format")
+    String[] due;
 
-    @Option(names = {"--priority"}, description = "Minimum priority of tasks listed")
-    String prioirity;
+    @Option(names = {"--priority", "-p"}, description = "Minimum priority of tasks listed")
+    String priority;
 
-    @Option(names = {"--tag"}, arity = "1..*", description = "Tag of tasks listed")
+    @Option(names = {"--tag", "-t"}, arity = "0..*", description = "Tag of tasks listed")
     String[] tag;
 
-    @Option(names = {"--no-tag"}, arity = "0", description = "List only tasks with no tag")
+    @Option(names = {"--no-tag"}, arity = "0", description = "List only tasks with no tag. Equivalent to not specifying tag option argument")
     boolean noTag;
 
     @Option(names = {"--label"}, arity = "1..*", description = "Label of task to be listed")
@@ -113,32 +116,40 @@ class List implements Runnable {
 
 	@Override
     public void run() {
-        String tagArgument = Task.convertToString(tag);
+        String[] tagArgument = tag;
         if (noTag) tagArgument = null;
-        list(Task.convertToString(label),Task.convertToDate(due),prioirity,tagArgument);
+        try {
+            listTasks(label, due, priority, tagArgument);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     
 
     /*
-     * @param label: If label is not empty, only list task with label (or all tasks if empty)
-     * @param date: Only list tasks with a due date before or equal to the given date (all tasks if empty)
+     * @param label: If label is not null, only list task with identical label (or all tasks if empty)
+     * @param date: Only list tasks with a due date before or equal to the given date (all tasks if null)
      * @param priority: Only list tasks with a priority greater than or equal to the given priority (all tasks if empty or null)
      * @param tag: If not null, only list tasks with the given tag
      *
      * Lists tasks in "tasks.txt" based on arguments given
      */
-    static void list(String label, String date, String priority, String tag) {
+    static void listTasks(String[] label, String[] due, String priority, String[] tag) throws Exception {
         FileNavigator fn = new FileNavigator(Qdo.fileName);
         for (String line: fn.lines) {
-            Task currentTask = new Task(line);
-            if (!label.equals("")) {
-                if (!currentTask.label.equals(label)) continue;
+            Task currentTask = Task.of(line);
+            if (label != null) {
+                if (!currentTask.label.equals(Task.convertToString(label))) continue;
             }
-            if (Task.compareDates(currentTask.due, date) < 0) break;
+
+            TaskDateTime dateTimeCutoff = TaskDateTime.of(due);
+            if (currentTask.due.compareTo(dateTimeCutoff) < 0) break;
             if (Task.comparePriorities(currentTask.priority, priority) < 0) continue;
             if (tag != null){
-                if (tag.equals(currentTask.tag)) System.out.println(currentTask);
+                String match = Task.convertToString(tag);
+                if (match.equals(currentTask.tag)) 
+                    System.out.println(currentTask);
             }
             else System.out.println(currentTask);
             
@@ -156,15 +167,14 @@ class Remove implements Runnable {
 
     @Override
     public void run() {
-        removeTask(Task.convertToString(label));
+        removeTask(label);
     }
 
-    static void removeTask(String label) {
+    static void removeTask(String[] label) {
+        String labelString = Task.convertToString(label);
         FileNavigator fn = new FileNavigator(Qdo.fileName);
-        if (!fn.removeTask(label)) {
-            System.err.println("No task with label " + label);
-            fn.close();
-            System.exit(1);
+        if (!fn.removeTask(labelString)) {
+            FileNavigator.noSuchLabelExit(labelString);
         }
         fn.close();
     }
@@ -179,58 +189,59 @@ class Modify implements Runnable {
     @Option(names = {"--label", "-l", "--new-label"}, arity = "1..*", description = "New label to be changed to")
     String[] newLabel;
 
-    @Option(names={"--tag"}, description = "Tag of modified task")
+    @Option(names={"--tag", "-t"}, description = "Tag of modified task")
     String[] tag;
 
     @Option(names = {"--description"}, arity = "0..*", description = "Description of modified task")
     String[] description;
 
-    @Option(names = {"--priority"}, description = "Priority of modified task")
+    @Option(names = {"--priority", "-p"}, description = "Priority of modified task")
     String priority;
 
-    @Option(names= {"--due"}, description = "Date modified task should be finished, in mm/dd/yyyy format")
-    String due;
+    @Option(names= {"--due"}, arity = "0..*", description = "Date modified task should be finished, in mm/dd/yyyy format")
+    String[] due;
 
     @Override
     public void run() {
-        modifyTask(label, newLabel, due,
-                priority, tag, description);
+        try {
+            modifyTask(label, newLabel, due, priority, tag, description);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    static void modifyTask(String[] originalLabel, String[] newLabel, String due, 
-            String priority, String[] tag, String[] description) {
+    static void modifyTask(String[] originalLabel, String[] newLabel, String[] due, 
+            String priority, String[] tag, String[] description) throws Exception {
         
         // Don't change if null input
-        String labelArgument;
-        String dueArgument;
+        String[] labelArgument; // label that will be added
+        String[] dueArgument;
         String priorityArgument;
-        String tagArgument;
-        String descriptionArguement;
-        // Check newLabel not already in file  
+        String[] tagArgument;
+        String[] descriptionArguement;
+         
         FileNavigator fn = new FileNavigator(Qdo.fileName);
         if (newLabel != null){
-            labelArgument = Task.convertToString(newLabel);
-            if (fn.findTask(labelArgument)) {
-                FileNavigator.duplicateLabelExit(labelArgument);
+            labelArgument = newLabel;
+            if (fn.findTask(Task.convertToString(labelArgument))) { // Check newLabel not already in file 
+                FileNavigator.duplicateLabelExit(Task.convertToString(labelArgument));
             }
-        } else labelArgument = Task.convertToString(originalLabel);
-        if (!fn.findTask(Task.convertToString(originalLabel))) {
-            FileNavigator.noSuchLabelExit(Task.convertToString(originalLabel));
-        }
-        Task taskToModify = new Task(fn.readLine());
+        } else labelArgument = originalLabel;
+
+        Task taskToModify = Task.of(fn.readLine());
         fn.close();
 
-        if (due == null) dueArgument = taskToModify.due;
+        if (due == null) dueArgument = taskToModify.due.toArr();
         else dueArgument = due;
         if (priority == null) priorityArgument = taskToModify.priority;
         else priorityArgument = priority;
-        if (tag == null) tagArgument = taskToModify.tag;
-        else tagArgument = Task.convertToString(tag);
-        if (description == null) descriptionArguement = taskToModify.description;
-        else descriptionArguement = Task.convertToString(description);
+        if (tag == null) tagArgument = new String[] {taskToModify.tag};
+        else tagArgument = tag;
+        if (description == null) descriptionArguement = new String[] {taskToModify.description};
+        else descriptionArguement = description;
         
         // Modify task
-        Remove.removeTask(Task.convertToString(originalLabel));
+        Remove.removeTask(originalLabel);
         Add.writeTask(labelArgument, dueArgument, priorityArgument, tagArgument, descriptionArguement);
     }
 

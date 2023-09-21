@@ -16,7 +16,7 @@ import org.junit.Test;
 public class QdoTest {
     String message;
     String fileName;
-    static String newline = "" + 13 + 10;
+    static String newline = "" + (char) 13 + (char) 10; // windows carriage return line feed
     String line1; String line2; String line3; String line4; String line5; String line6;
     Task task1; Task task2; Task task3; Task task4; Task task5; Task task6;
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -109,22 +109,20 @@ public class QdoTest {
     }
 
     @Test
-    public void testList() {
+    public void testList() throws Exception {
         String[] label;
         String[] due;
         String priority;
         String[] tag;
-        String[] description;
 
         label = null;
         due = null;
         priority = null;
         tag = null;
-        description = null;
-        listTasks(label, due, priority, tag, description);
+        listTasks(label, due, priority, tag);
         String result = outputStream.toString();
-        String expected = line1 + newline + line2 + newline + line3 + newline 
-                + line4 + newline + line5 + newline + line6 + newline;
+        String expected = task1.toString() + newline + task2.toString() + newline + task3.toString() + newline 
+                + task4.toString() + newline + task5.toString() + newline + task6.toString() + newline;
         assertEquals(expected, result);
 
         // test due, priority
@@ -132,10 +130,9 @@ public class QdoTest {
         due = new String[] {"01/01/1001", "20:00"};
         priority = "10";
         tag = null;
-        description = null;
-        listTasks(label, due, priority, tag, description);
+        listTasks(label, due, priority, tag);
         result = outputStream.toString();
-        expected += line1 + newline + line3 + newline;
+        expected += task1.toString() + newline + task3.toString() + newline;
         assertEquals(expected, result);
 
         // test tag
@@ -143,10 +140,10 @@ public class QdoTest {
         due = null;
         priority = null;
         tag = new String[] {};
-        description = null;
-        listTasks(label, due, priority, tag, description);
+        listTasks(label, due, priority, tag);
         result = outputStream.toString();
-        expected += line6 + newline;
+        expected += task1.toString() + newline + task2.toString() + newline + task3.toString() + newline 
+                + task4.toString() + newline + task5.toString() + newline;
         assertEquals(expected, result);
 
         // test label
@@ -154,16 +151,15 @@ public class QdoTest {
         due = null;
         priority = null;
         tag = null;
-        description = null;
-        listTasks(label, due, priority, tag, description);
+        listTasks(label, due, priority, tag);
         result = outputStream.toString();
-        expected += line4 + newline;
+        expected += task4.toString() + newline;
         assertEquals(expected, result);
     }
 
 
     @Test
-    public void testRemove() {
+    public void testRemove() throws Exception {
         removeTask(new String[] {"HDHTHP"}); // first task
         removeTask(new String[] {"HDLTHP"}); // middle task
         removeTask(new String[] {"NDNTNP"}); // last task
@@ -176,7 +172,7 @@ public class QdoTest {
     }
 
     @Test
-    public void testModify() {
+    public void testModify() throws Exception {
         line1 = "HDHTHP#01/01/1001#00:00#10##";
         line2 = "HDHTNP#01/01/1001#00:00###";
         line3 = "HDLTHP#01/01/1001#20:00#10##";
@@ -200,11 +196,13 @@ public class QdoTest {
         priority = "5";
         tag = new String[]{};
         description = new String[] {};
+        modifyTask(label, newLabel, due, priority, tag, description);
 
         String expected = line1 + "\n" + line2 + "\n" + line3 + "\n" 
                 + line4 + "\n" + newLine6 + "\n" + line5  + "\n";
         String result = readFile("tasks.txt");
         assertEquals(expected, result);
+
 
         // test changing description, keeping other features the same
         String newLine1 = "HDHTHP#01/01/1001#00:00#10##Added description";
@@ -215,6 +213,7 @@ public class QdoTest {
         priority = null;
         tag = null;
         description = new String[] {"Added", "description"};
+        modifyTask(label, newLabel, due, priority, tag, description);
 
         expected = newLine1 + "\n" + line2 + "\n" + line3 + "\n" 
                 + line4 + "\n" + newLine6 + "\n" + line5  + "\n";
@@ -279,15 +278,15 @@ public class QdoTest {
         Add.writeTask(label, due, priority, tag, description);
     }
 
-    public static void listTasks(String[] label, String[] due, String priority, String[] tag, String[] description) {
-        List.listTasks(label, due, priority, tag, description);
+    public static void listTasks(String[] label, String[] due, String priority, String[] tag) throws Exception {
+        List.listTasks(label, due, priority, tag);
     }
 
     public static void removeTask(String[] label) {
         Remove.removeTask(label);
     }
 
-    public static void modifyTask(String[] label, String[] newLabel, String[] due, String priority, String[] tag, String[] description) {
+    public static void modifyTask(String[] label, String[] newLabel, String[] due, String priority, String[] tag, String[] description) throws Exception {
         Modify.modifyTask(label, newLabel, due, priority, tag, description);
     }
 

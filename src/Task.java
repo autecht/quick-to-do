@@ -71,7 +71,7 @@ public class Task {
 
     static int comparePriorities(String p1, String p2) {
         boolean firstEmpty = p1.equals("");
-        boolean secondEmpty = p2.equals("");
+        boolean secondEmpty = p2 == null || p2.equals("");
         if (firstEmpty) {
             if (secondEmpty) return 0;
             else return -1;
@@ -138,7 +138,11 @@ public class Task {
         String whitespace = "     ";
         String newLine = "\n";
         String result = String.format("Task: %s", this.label);
-        if (!this.due.equals("")) result += newLine + whitespace + "Due: " + this.due;
+        String date = this.due.getDate();
+        String time = this.due.getTime();
+
+        if (!date.equals("")) result += newLine + whitespace + "Date: " + date;
+        if (!time.equals("")) result += newLine + whitespace + "Time: " + time;
         if (!this.priority.equals("")) result += newLine + whitespace + "Priority: " + this.priority;
         if (!this.tag.equals("")) result += newLine + whitespace + "Tag: " + this.tag;
         if (!this.description.equals("")) result += newLine + whitespace + "Description: " + this.description; // TODO: should include newlines in description
