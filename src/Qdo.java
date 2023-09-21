@@ -33,14 +33,14 @@ public class Qdo{
 class Add implements Runnable {
 
 
-    @Option(names={"--tag, -t"}, arity = "1..*", 
+    @Option(names={"--tag", "-t"}, arity = "1..*", 
             description = "Tag with which task is associated. Can search to-do list by tag")
     String[] tag;
 
     @Option(names = {"--description"}, arity = "1..*", description = "Description of task")
     String[] description;
 
-    @Option(names = {"--priority, -p"}, description = "Integer representing priority level of task, where higher integer is higher priority")
+    @Option(names = {"--priority", "-p"}, description = "Integer representing priority level of task, where higher integer is higher priority")
     String priority;
 
     @Option(names= {"--due"}, description = "Day task should be finished, in mm/dd/yyyy format. Earlier dates given higher precedence")
