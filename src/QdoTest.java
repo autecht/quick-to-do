@@ -61,6 +61,7 @@ public class QdoTest {
         priority = "10";
         tag = null;
         description = null;
+        System.err.println(readFile("tasks.txt"));
         writeTask(label, due, priority, tag, description); //line5 = "LDHTHP#01/01/3001#00:00#10##";
 
         label = new String[] {"HDHTHP"};

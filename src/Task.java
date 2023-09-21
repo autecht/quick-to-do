@@ -85,7 +85,8 @@ public class Task {
      * returns String that is representation of task in format label#due#priority#tag#description
      */
     public String toLine() {
-        return this.label + "#" + this.due + "#" + this.priority + "#" + this.tag + "#" + this.description;
+        return this.label + "#" + this.due.getDate() + "#" + this.due.getTime() 
+                + "#" + this.priority + "#" + this.tag + "#" + this.description;
     }
 
     /*

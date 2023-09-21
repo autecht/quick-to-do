@@ -54,8 +54,11 @@ class Add implements Runnable {
 
     @Override
     public void run() {
-        
-        writeTask(label, due, priority, tag, description);
+        try {
+            writeTask(label, due, priority, tag, description);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /*
