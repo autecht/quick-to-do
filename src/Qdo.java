@@ -1,6 +1,9 @@
 // TODO: add options for list, increase date formats
 // TODO: fix bugs - no label searching
 
+import java.io.File;
+import java.util.Scanner;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -8,7 +11,7 @@ import picocli.CommandLine.Parameters;
 
 
 
-@Command(subcommands = {Add.class, List.class, Remove.class, Modify.class}, name = "qdo", version = "qdo 1.0", mixinStandardHelpOptions = true)
+@Command(subcommands = {Add.class, List.class, Remove.class, Modify.class, Clear.class}, name = "qdo", version = "qdo 1.0", mixinStandardHelpOptions = true)
 public class Qdo{
     static final String fileName = "tasks.txt";
     static final char delimeter = '#';
@@ -43,41 +46,43 @@ class Add implements Runnable {
     @Option(names = {"--priority", "-p"}, description = "Integer representing priority level of task, where higher integer is higher priority")
     String priority;
 
-    @Option(names= {"--due"}, description = "Day task should be finished, in mm/dd/yyyy format. Earlier dates given higher precedence")
-    String due;
+    @Option(names= {"--due"}, arity = "1..*", description = "Day and, optionally, time task should be completed by. Earlier dates and times given higher precedence")
+    String[] due;
 
     @Parameters(paramLabel = "<label>", arity="1..*", description = "Label representing task")
     String[] label;
 
     @Override
     public void run() {
-        // deal with nulls and check date
-        if (priority == null) priority = "";
-        if (due == null) due = "";
-        String date = Task.convertToDate(due);
-        writeTask(Task.convertToString(label), date, priority,
-            Task.convertToString(tag), 
-            Task.convertToString(description));
+        
+        writeTask(label, due, priority, tag, description);
     }
 
     /*
-     * Inserts task represented by parameters given into file in position based on task priority.
+     * Inserts task represented by parameters given into file in position based on task precedence.
      * Points lineNumber to point to line after task.
      */
-    static void writeTask(String label, String due, String priority, String tag, String description) {
+    static void writeTask(String[] label, String[] due, String priority, String[] tag, String[] description) throws Exception{
+        // convert arguments to Strings
+        String labelArgument = Task.convertToString(label);
+        String priorityArgument;
+        if (priority == null) priorityArgument = "";
+        else priorityArgument = priority;
+        String tagArgument = Task.convertToString(tag);
+        String descriptionArgument = Task.convertToString(description);
+        
         FileNavigator fn = new FileNavigator(Qdo.fileName);
-        Task task = new Task(label, due, priority, tag, description);
+        Task task = new Task(labelArgument, due, priorityArgument, tagArgument, descriptionArgument);
         if (fn.findTask(task)) {
-            System.err.println("Duplicate task");
-            System.exit(1);
+            throw new Exception("Duplicate task");
         }
 
         String taskLine = null;
         while ((taskLine = fn.readLine()) != null) {
-            if (task.compareTask(taskLine) > 0) break;
+            if (task.compareTo(taskLine) > 0) break;
         }
-        if (taskLine == null) fn.insert(task);
-        else fn.insert(fn.getLine() - 1, task);
+        if (taskLine == null) fn.insert(task); // insert at end of file
+        else fn.insert(fn.getLine() - 1, task); // insert before task with lower precedence
         fn.close();
     }
 
@@ -233,11 +238,27 @@ class Modify implements Runnable {
 }
 
 
+@Command(name = "clear", mixinStandardHelpOptions= true, description = "Remove all tasks from to-do list")
+class Clear implements Runnable {
+
+    @Override
+    public void run() {
+
+        Scanner inputScanner = new Scanner(System.in);
+        String input = "";
+        do {
+            System.out.println("Are you sure you want to remove all tasks from to-do list? Change cannot be reverted. Type y/n");
+            if (input.equals("n")) {
+                inputScanner.close();
+                System.exit(0);
+            }
+        }
+        while (!(input = inputScanner.nextLine()).equals("y"));
+
+        inputScanner.close();
+        File toDelete = new File(Qdo.fileName);
+        toDelete.delete();
+    }
 
 
-/*
-qdo add -tag -description -due -priority label
-qdo list
-qdo check label
-qdo modify label -tag -description -due -priority
- */
+}

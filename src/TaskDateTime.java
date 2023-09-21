@@ -25,21 +25,11 @@ public class TaskDateTime {
      * return new TaskDateTime where date is due[0] and time is due[1]
      * Assumes date is formatted as mm/dd/yyyy or is empty String and time is formatted as hh:mm
      */
-    public static  TaskDateTime of(String[] due) {
-        String date;
-        String time;
-        if (due == null) {
-            date = null;
-            time = null;
-        }
-        else if (due.length == 1) {
-            date = due[0];
-            time = null;
-        }
-        else {
-            date = due[0];
-            time = due[1];
-        }
+    public static  TaskDateTime of(String[] due) throws Exception {
+        due = checkFormat(due);
+        String date = due[0];
+        String time = due[1];
+        
         return TaskDateTime.of(date, time);
     }
 
@@ -104,7 +94,7 @@ public class TaskDateTime {
     }
 
     /*
-     * Retruns date in format mm/dd/yyyy
+     * Retruns date in format mm/dd/yyyy, where empty String represents no date
      * throws error if date cannot be read
      */
     static String convertToDate(String date) {

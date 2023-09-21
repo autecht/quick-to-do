@@ -22,7 +22,7 @@ public class QdoTest {
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     @Before
-    public void setupTest() {
+    public void setupTest() throws Exception {
         File toDelete = new File("tasks.txt");
         toDelete.delete();
         // label#date#time#priority#tag#descritpion
@@ -35,12 +35,12 @@ public class QdoTest {
         line5 = "LDHTHP#01/01/3001#00:00#10##";
         line6 = "NDNTNP####A tag#A description"; 
 
-        task1 = new Task(line1);
-        task2 = new Task(line2);
-        task3 = new Task(line3);
-        task4 = new Task(line4);
-        task5 = new Task(line5);
-        task6 = new Task(line6);
+        task1 = Task.of(line1);
+        task2 = Task.of(line2);
+        task3 = Task.of(line3);
+        task4 = Task.of(line4);
+        task5 = Task.of(line5);
+        task6 = Task.of(line6);
 
         // insert tasks in mixed order
         String[] label;
@@ -274,7 +274,7 @@ public class QdoTest {
         }
     }
 
-    public static void writeTask(String[] label, String[] due, String priority, String[] tag, String[] description) {
+    public static void writeTask(String[] label, String[] due, String priority, String[] tag, String[] description) throws Exception {
         Add.writeTask(label, due, priority, tag, description);
     }
 
