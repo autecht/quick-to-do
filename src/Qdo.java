@@ -4,8 +4,6 @@
 import java.io.File;
 import java.util.Scanner;
 
-import com.oracle.graal.compiler.enterprise.phases.strings.r;
-
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
