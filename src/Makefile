@@ -1,5 +1,5 @@
 classes/Qdo.class: Qdo.java
-	javac -cp "./classes;../lib/picocli-4.7.4.jar;../lib/picocli-codegen-4.7.4.jar" -d classes Qdo.java FileNavigator.java Task.java
+	javac -cp "./classes;../lib/picocli-4.7.4.jar;../lib/picocli-codegen-4.7.4.jar" -d classes Qdo.java FileNavigator.java Task.java TaskDateTime.java
 qdo.jar: classes/Qdo.class
 	jar -cvef Qdo qdo.jar classes/*
 qdo: qdo.jar
@@ -9,4 +9,4 @@ clean:
 	rm qdo.jar
 
 class: Qdo.java
-	javac -cp "./classes;../lib/picocli-4.7.4.jar;../lib/picocli-codegen-4.7.4.jar" -d classes Qdo.java FileNavigator.java Task.java
+	javac -cp "./classes;../lib/picocli-4.7.4.jar;../lib/picocli-codegen-4.7.4.jar" -d classes Qdo.java TaskDateTime.java FileNavigator.java Task.java
