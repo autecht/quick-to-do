@@ -13,17 +13,21 @@ import picocli.CommandLine.Parameters;
 
 @Command(subcommands = {Add.class, List.class, Remove.class, Modify.class, Clear.class}, name = "qdo", version = "qdo 1.0", mixinStandardHelpOptions = true)
 public class Qdo{
-    static final String fileName = "tasks.txt";
-    static final char delimeter = '#';
-    static final String delimeterString = "#";
+    static final String FILENAME = "tasks.txt";
+    static final char DELIMETER_CHAR = '#';
+    static final String DELIMETE_STRING = "#";
+    static final String ANSI_RED = "\033[91m";
+    static final String ANSI_GREEN = "\033[32m";
+    static final String ANSI_RESET = "\033[0m";
+
 
     public static void main(String[] args) throws Exception {
         
         for (String argument: args) {
             for (int i = 0; i < argument.length(); i++) {
-                if (argument.charAt(i) == delimeter) {
+                if (argument.charAt(i) == DELIMETER_CHAR) {
                     throw new Exception(String.format(
-                        "Argument %s: cannot use delimeter %c", argument, delimeter));
+                        "Argument %s: cannot use delimeter %c", argument, DELIMETER_CHAR));
                 }
             }
         }
@@ -74,7 +78,7 @@ class Add implements Runnable {
         String tagArgument = Task.convertToString(tag);
         String descriptionArgument = Task.convertToString(description);
         
-        FileNavigator fn = new FileNavigator(Qdo.fileName);
+        FileNavigator fn = new FileNavigator(Qdo.FILENAME);
         Task task = new Task(labelArgument, due, priorityArgument, tagArgument, descriptionArgument);
         if (fn.findTask(task)) {
             throw new Exception("Duplicate task");
@@ -134,7 +138,7 @@ class List implements Runnable {
      * Lists tasks in "tasks.txt" based on arguments given
      */
     static void listTasks(String[] label, String[] due, String priority, String[] tag) throws Exception {
-        FileNavigator fn = new FileNavigator(Qdo.fileName);
+        FileNavigator fn = new FileNavigator(Qdo.FILENAME);
         for (String line: fn.lines) {
             Task currentTask = Task.of(line);
             if (label != null) {
@@ -147,9 +151,9 @@ class List implements Runnable {
             if (tag != null){
                 String match = Task.convertToString(tag);
                 if (match.equals(currentTask.tag)) 
-                    System.out.println(currentTask);
+                    System.out.println(currentTask.toStringWithColor());
             }
-            else System.out.println(currentTask);
+            else System.out.println(currentTask.toStringWithColor());
             
         }
         fn.close();
@@ -170,7 +174,7 @@ class Remove implements Runnable {
 
     static void removeTask(String[] label) {
         String labelString = Task.convertToString(label);
-        FileNavigator fn = new FileNavigator(Qdo.fileName);
+        FileNavigator fn = new FileNavigator(Qdo.FILENAME);
         if (!fn.removeTask(labelString)) {
             FileNavigator.noSuchLabelExit(labelString);
         }
@@ -218,7 +222,7 @@ class Modify implements Runnable {
         String[] tagArgument;
         String[] descriptionArguement;
          
-        FileNavigator fn = new FileNavigator(Qdo.fileName);
+        FileNavigator fn = new FileNavigator(Qdo.FILENAME);
         if (newLabel != null){
             labelArgument = newLabel;
             if (fn.findTask(Task.convertToString(labelArgument))) { // Check newLabel not already in file 
@@ -268,7 +272,7 @@ class Clear implements Runnable {
         while (!(input = inputScanner.nextLine()).equals("y"));
 
         inputScanner.close();
-        File toDelete = new File(Qdo.fileName);
+        File toDelete = new File(Qdo.FILENAME);
         toDelete.delete();
     }
 

@@ -121,8 +121,8 @@ public class QdoTest {
         tag = null;
         listTasks(label, due, priority, tag);
         String result = outputStream.toString();
-        String expected = task1.toString() + newline + task2.toString() + newline + task3.toString() + newline 
-                + task4.toString() + newline + task5.toString() + newline + task6.toString() + newline;
+        String expected = task1.toStringWithColor() + newline + task2.toStringWithColor() + newline + task3.toStringWithColor() + newline 
+                + task4.toStringWithColor() + newline + task5.toStringWithColor() + newline + task6.toStringWithColor() + newline;
         assertEquals(expected, result);
 
         // test due, priority
@@ -132,7 +132,7 @@ public class QdoTest {
         tag = null;
         listTasks(label, due, priority, tag);
         result = outputStream.toString();
-        expected += task1.toString() + newline + task3.toString() + newline;
+        expected += task1.toStringWithColor() + newline + task3.toStringWithColor() + newline;
         assertEquals(expected, result);
 
         // test tag
@@ -142,8 +142,8 @@ public class QdoTest {
         tag = new String[] {};
         listTasks(label, due, priority, tag);
         result = outputStream.toString();
-        expected += task1.toString() + newline + task2.toString() + newline + task3.toString() + newline 
-                + task4.toString() + newline + task5.toString() + newline;
+        expected += task1.toStringWithColor() + newline + task2.toStringWithColor() + newline + task3.toStringWithColor() + newline 
+                + task4.toStringWithColor() + newline + task5.toStringWithColor() + newline;
         assertEquals(expected, result);
 
         // test label
@@ -153,7 +153,7 @@ public class QdoTest {
         tag = null;
         listTasks(label, due, priority, tag);
         result = outputStream.toString();
-        expected += task4.toString() + newline;
+        expected += task4.toStringWithColor() + newline;
         assertEquals(expected, result);
     }
 

@@ -148,5 +148,26 @@ public class Task {
         if (!this.description.equals("")) result += newLine + whitespace + "Description: " + this.description; // TODO: should include newlines in description
         return result;
     }
+
+    /*
+     * return String representation of Task with color from ANSI escape code
+     * red represents task due date and time have passed
+     * green represents task due date is today
+     */
+    public String toStringWithColor() {
+        String escapeSequence = "";
+        TaskDateTime today = TaskDateTime.now();
+        if (today.compareTo(this) < 0) {
+            escapeSequence = Qdo.ANSI_RED;
+        }
+        else {
+            boolean sameDay = today.getDateInt() == this.due.getDateInt();
+            if (sameDay) {
+                escapeSequence = Qdo.ANSI_GREEN;
+            }
+        }
+        return escapeSequence + this.toString() + Qdo.ANSI_RESET;
+
+    }
     
 }

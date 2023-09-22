@@ -141,6 +141,16 @@ public class TaskDateTime {
     }
 
     /*
+     * return integer encoding of date
+     */
+    public int getDateInt() {
+        if (this.dateTime == null) return -1;
+        int year = this.dateTime.getYear();
+        int day = this.dateTime.getDayOfYear();
+        return year * 366 + day;
+    }
+
+    /*
      * returns array representation of TaskDateTime, where sections[0] is date and sections[1] is time
      */
     public String[] toArr() {
@@ -194,6 +204,10 @@ public class TaskDateTime {
 
     public boolean hasNoDateTime() {
         return this.dateTime == null;
+    }
+
+    public int compareTo(Task t) {
+        return this.compareTo(t.due);
     }
 
 }
