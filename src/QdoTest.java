@@ -1,4 +1,5 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -61,7 +62,6 @@ public class QdoTest {
         priority = "10";
         tag = null;
         description = null;
-        System.err.println(readFile("tasks.txt"));
         writeTask(label, due, priority, tag, description); //line5 = "LDHTHP#01/01/3001#00:00#10##";
 
         label = new String[] {"HDHTHP"};
@@ -124,6 +124,7 @@ public class QdoTest {
         String expected = task1.toStringWithColor() + newline + task2.toStringWithColor() + newline + task3.toStringWithColor() + newline 
                 + task4.toStringWithColor() + newline + task5.toStringWithColor() + newline + task6.toStringWithColor() + newline;
         assertEquals(expected, result);
+        //System.err.println(result);
 
         // test due, priority
         label = null;
@@ -222,8 +223,20 @@ public class QdoTest {
 
         
         this.setupTest();
-    
     }
+
+    @Test
+    public void testToString() {
+        Task filledTask = new Task("label", "01/02/2000", 
+                "00:00", "0", "tag", "description");
+        String result = filledTask.toString();
+        String expected = "Task: label\n     Date: 01/02/2000\n     Time: 00:00" +
+                "\n     Priority: 0\n     Tag: tag\n     Description: description";
+        assertEquals(expected, result);
+    }
+
+
+
 
 
 

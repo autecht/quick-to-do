@@ -106,7 +106,7 @@ public class Task {
     static String[] getSections(String line) {
         String[] result = {"", "", "", "", "", ""};
         int pos = 0;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
             char c;
             while (pos < line.length() && (c = line.charAt(pos)) != '#') {
                 result[i] += c;
@@ -145,7 +145,7 @@ public class Task {
         if (!time.equals("")) result += newLine + whitespace + "Time: " + time;
         if (!this.priority.equals("")) result += newLine + whitespace + "Priority: " + this.priority;
         if (!this.tag.equals("")) result += newLine + whitespace + "Tag: " + this.tag;
-        if (!this.description.equals("")) result += newLine + whitespace + "Description: " + this.description; // TODO: should include newlines in description
+        if (!this.description.equals("")) result += newLine + whitespace + "Description: " + this.description;
         return result;
     }
 
