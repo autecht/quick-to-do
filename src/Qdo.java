@@ -99,7 +99,7 @@ class Add implements Runnable {
 @Command(name = "list", mixinStandardHelpOptions= true, description = "List tasks currently on to-do list")
 class List implements Runnable {
 
-	@Option(names = {"--due, --due-by"}, arity = "0..*",
+	@Option(names = {"--due", "--due-by"}, arity = "0..*",
             description = "Date and, optionally, time by which tasks listed are due, in mm/dd/yyyy format")
     String[] due;
 
