@@ -51,7 +51,8 @@ class Add implements Runnable {
     @Option(names = {"--priority", "-p"}, description = "Integer representing priority level of task, where higher integer is higher priority")
     String priority;
 
-    @Option(names= {"--due"}, arity = "1..*", description = "Day and, optionally, time task should be completed by. Earlier dates and times given higher precedence")
+    @Option(names= {"--due"}, arity = "1..*", 
+        description = "Day and, optionally, time task should be completed by. Earlier dates and times given higher precedence")
     String[] due;
     // TODO: remove parameter and make option?
     @Option(required = true, names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
