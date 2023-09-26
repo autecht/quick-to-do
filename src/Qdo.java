@@ -21,6 +21,7 @@ public class Qdo{
     static final String ANSI_RESET = "\033[0m";
 
 
+
     public static void main(String[] args) throws Exception {
         
         for (String argument: args) {
@@ -52,8 +53,8 @@ class Add implements Runnable {
 
     @Option(names= {"--due"}, arity = "1..*", description = "Day and, optionally, time task should be completed by. Earlier dates and times given higher precedence")
     String[] due;
-
-    @Parameters(paramLabel = "<label>", arity="1..*", description = "Label representing task")
+    // TODO: remove parameter and make option?
+    @Option(required = true, names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
     String[] label;
 
     @Override
@@ -112,7 +113,7 @@ class List implements Runnable {
     @Option(names = {"--no-tag"}, arity = "0", description = "List only tasks with no tag. Equivalent to not specifying tag option argument")
     boolean noTag;
 
-    @Option(names = {"--label"}, arity = "1..*", description = "Label of task to be listed")
+    @Option(names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
     String[] label;
 
 
@@ -164,7 +165,7 @@ class List implements Runnable {
 @Command(name = "remove", mixinStandardHelpOptions = true, description = "Remove/check off task from to-do list")
 class Remove implements Runnable {
 
-    @Parameters (paramLabel = "<label>", arity = "1..*", description = "Label of task to be removed")
+    @Option(required = true, names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
     String[] label;
 
     @Override
@@ -185,10 +186,10 @@ class Remove implements Runnable {
 @Command(name = "modify", mixinStandardHelpOptions = true, description = "Modify aspects of task on to-do list")
 class Modify implements Runnable {
 
-    @Parameters(paramLabel = "<label>", arity = "1..*", description = "Label of task to be modified")
+    @Option(required = true, names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
     String[] label;
 
-    @Option(names = {"--label", "-l", "--new-label"}, arity = "1..*", description = "New label to be changed to")
+    @Option(names = {"-n", "--new-label"}, arity = "1..*", description = "New label to be changed to")
     String[] newLabel;
 
     @Option(names={"--tag", "-t"}, description = "Tag of modified task")
