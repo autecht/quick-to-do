@@ -11,7 +11,7 @@ import picocli.CommandLine.Parameters;
 
 
 
-@Command(subcommands = {Add.class, List.class, Remove.class, Modify.class, Clear.class}, name = "qdo", version = "qdo 1.0", mixinStandardHelpOptions = true)
+@Command(subcommands = {Add.class, List.class, Remove.class, Modify.class, Clear.class}, name = "qdo", version = "qdo 2.0", mixinStandardHelpOptions = true)
 public class Qdo{
     static final String FILENAME = "tasks.txt";
     static final char DELIMETER_CHAR = '#';
@@ -35,6 +35,49 @@ public class Qdo{
         int exitCode = new CommandLine(new Qdo()).execute(args);
         System.exit(exitCode);
     }
+
+
+    /*
+     * @param labelOption: label specified by flag, null if not specified
+     * @param labelParem: label specified by positional parameters, null if not specified
+     *
+     * Checks that exactly one label specified. Returns this label.
+     */
+    public static String[] getRequiredLabel(String[] labelOption, String[] labelParam, String subcommand) throws Exception {
+        boolean optionSpecified = labelOption != null;
+        boolean paramSpecified = labelParam != null;
+
+        if (optionSpecified && paramSpecified)
+            throw new Exception(String.format("Usage: Qdo %s --label <task label> OR Qdo %s <task label>. " 
+                    + "Cannot have both label flag and positional parameters.", subcommand, subcommand));
+        if (!optionSpecified && !paramSpecified)
+            throw new Exception(String.format("Usage: Qdo %s --label <task label> OR Qdo %s <task label>. " 
+                    + "Must include --label flag or positional parameters.", subcommand, subcommand));
+
+        if (optionSpecified)
+            return labelOption;
+        else
+            return labelParam;
+    }
+
+    /*
+     * @param labelOption: label specified by flag, null if not specified
+     * @param labelParem: label specified by positional parameters, null if not specified
+     *
+     * Checks that up to one label specified. Returns this label (null if no label specified).
+     */
+    public static String[] getOptionalLabel(String[] labelOption, String[] labelParam, String subcommand) throws Exception {
+        boolean optionSpecified = labelOption != null;
+        boolean paramSpecified = labelParam != null;
+
+        if (optionSpecified && paramSpecified)
+            throw new Exception(String.format("Usage: Qdo %s --label <task label> OR Qdo %s <task label>. " 
+                    + "Cannot have both label flag and positional parameters.", subcommand, subcommand));
+        if (paramSpecified)
+            return labelParam;
+        else
+            return labelOption;
+    }
 }
 
 @Command(name = "add", mixinStandardHelpOptions = true, description = "Add task to-do list")
@@ -51,16 +94,20 @@ class Add implements Runnable {
     @Option(names = {"--priority", "-p"}, description = "Integer representing priority level of task, where higher integer is higher priority")
     String priority;
 
-    @Option(names= {"--due"}, arity = "1..*", 
+    @Option(names= {"--due"}, arity = "0..*", 
         description = "Day and, optionally, time task should be completed by. Earlier dates and times given higher precedence")
     String[] due;
-    // TODO: remove parameter and make option?
-    @Option(required = true, names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
-    String[] label;
+    
+    @Option(names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
+    String[] labelOption;
+
+    @Parameters (paramLabel = "<task label>", arity = "1..*", description = "Label representing task (optional replacement for --label flag)")
+    String[] labelParam;
 
     @Override
     public void run() {
         try {
+            String[] label = Qdo.getRequiredLabel(labelOption, labelParam, "add");
             writeTask(label, due, priority, tag, description);
         } catch (Exception e) {
             e.printStackTrace();
@@ -115,14 +162,18 @@ class List implements Runnable {
     boolean noTag;
 
     @Option(names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
-    String[] label;
+    String[] labelOption;
+
+    @Parameters (paramLabel = "<task label>", arity = "1..*", description = "Label representing task (optional replacement for --label flag)")
+    String[] labelParam;
 
 
 	@Override
     public void run() {
         String[] tagArgument = tag;
         if (noTag) tagArgument = null;
-        try {
+        try {  
+            String[]  label = Qdo.getOptionalLabel(labelOption, labelParam, "list");
             listTasks(label, due, priority, tagArgument);
         } catch (Exception e) {
             e.printStackTrace();
@@ -166,12 +217,17 @@ class List implements Runnable {
 @Command(name = "remove", mixinStandardHelpOptions = true, description = "Remove/check off task from to-do list")
 class Remove implements Runnable {
 
-    @Option(required = true, names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
-    String[] label;
+    @Option(names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
+    String[] labelOption;
+
+    @Parameters (paramLabel = "<task label>", arity = "1..*", description = "Label representing task (optional replacement for --label flag)")
+    String[] labelParam;
 
     @Override
     public void run() {
-        removeTask(label);
+        try{
+        String[] label = Qdo.getRequiredLabel(labelOption, labelParam, "remove");
+        removeTask(label); } catch (Exception e) {e.printStackTrace();}
     }
 
     static void removeTask(String[] label) {
@@ -187,8 +243,11 @@ class Remove implements Runnable {
 @Command(name = "modify", mixinStandardHelpOptions = true, description = "Modify aspects of task on to-do list")
 class Modify implements Runnable {
 
-    @Option(required = true, names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
-    String[] label;
+    @Option(names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
+    String[] labelOption;
+
+    @Parameters (paramLabel = "<task label>", arity = "1..*", description = "Label representing task (optional replacement for --label flag)")
+    String[] labelParam;
 
     @Option(names = {"-n", "--new-label"}, arity = "1..*", description = "New label to be changed to")
     String[] newLabel;
@@ -208,6 +267,7 @@ class Modify implements Runnable {
     @Override
     public void run() {
         try {
+            String[] label = Qdo.getRequiredLabel(labelOption, labelParam, "modify");
             modifyTask(label, newLabel, due, priority, tag, description);
         } catch (Exception e) {
             e.printStackTrace();

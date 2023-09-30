@@ -12,23 +12,23 @@ edit the PATH environment variable to include the directory of `qdo.exe` on your
 ## Usage
 ### Add
 Use the `add` subcommand to add a task to the file. A task label must be specified, but other flags are optional. 
-Use `--label <task label>` to specify the label of the task to be added.
+Use `--label <task label>` to specify the label of the task to be added. Or, you can specify the task label with positional parameters. 
 Use `--due <date> <time>`  to specify the date and, optionally, the time the task should be completed in.
 Use `--priority <priority-level>` to specify the priority level of the task.
 Use `--tag <tag>` to specify the tag of the task and `--description <description of task>` to specify the description of the task.
 ### List
 Use the `list` subcommand to list the tasks in the to-do list in a readable format. By default, `list` lists all tasks in the to-do list. 
-Use `--label <task label>` to only list the task with the given label.
+Use `--label <task label>` to only list the task with the given label. Or, you can specify the task label with positional parameters. 
 Use `--due <date> <time>` to only list tasks due by the given date and time.
 Use `--priority <priority level>` to only lists tasks with a priority level equal to or greater than the given priority level.
 Use `--tag <tag of task>` to only list tasks with a tag matching the tag argument.
 Use `--no-tag` to only list tasks without a tag.
 ### Remove
-Use `remove --label <task label>` to remove a task with the given label from the to-do list.
+Use `remove --label <task label>` to remove a task with the given label from the to-do list. Or, you can specify the task label with positional parameters.
 
 ### Modify
 Use the `modify` subcommand with a label flag to modify any features a task with the given label.
-Use `--label <task label>` to specify the label of the task to be modified.
+Use `--label <task label>` to specify the label of the task to be modified. Or, you can specify the task label with positional parameters. 
 Use `--new-label <new label>` flag to change the label of the task to the new label.
 Use `--due <date> <time>` flag to change the date and, optionally, time of the task.
 Use `--priority <new priority>` to change the priority level of the task.
