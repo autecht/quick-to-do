@@ -25,6 +25,7 @@ Use `--tag <tag of task>` to only list tasks with a tag matching the tag argumen
 Use `--no-tag` to only list tasks without a tag.
 ### Remove
 Use `remove --label <task label>` to remove a task with the given label from the to-do list. Or, you can specify the task label with positional parameters.
+Alternatively, use `remove --task-number <i>` to remove the ith task from the to-do list (position of tasks can be found with list subcommand).
 
 ### Modify
 Use the `modify` subcommand with a label flag to modify any features a task with the given label.

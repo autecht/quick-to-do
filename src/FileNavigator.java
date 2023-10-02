@@ -146,9 +146,20 @@ public class FileNavigator {
             this.lineNumber--;
             return true;
         }
-        return false;
-        
+        return false; 
     }
+
+    /*
+     * @param task: line number of task to be removed
+     * Assumes there are at least lineNumber tasks and lineNumber is positive.
+     * Removes task in 1-indexed position lineNumber from fileNavigator. Points lineNumber
+     * at beginning of FileNavigator.
+     *
+     */
+    public void removeTask(int lineNumber) {
+        this.lines.remove(lineNumber - 1);
+    }
+
 
     static void duplicateLabelExit(String label) {
         System.err.println(String.format("Duplicate label: %s already exists in to-do list", label));

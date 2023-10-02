@@ -101,7 +101,7 @@ class Add implements Runnable {
     @Option(names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
     String[] labelOption;
 
-    @Parameters (paramLabel = "<task label>", arity = "1..*", description = "Label representing task (optional replacement for --label flag)")
+    @Parameters (paramLabel = "<task label>", arity = "0..*", description = "Label representing task (optional replacement for --label flag)")
     String[] labelParam;
 
     @Override
@@ -164,7 +164,7 @@ class List implements Runnable {
     @Option(names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
     String[] labelOption;
 
-    @Parameters (paramLabel = "<task label>", arity = "1..*", description = "Label representing task (optional replacement for --label flag)")
+    @Parameters (paramLabel = "<task label>", arity = "0..*", description = "Label representing task (optional replacement for --label flag)")
     String[] labelParam;
 
 
@@ -192,7 +192,8 @@ class List implements Runnable {
      */
     static void listTasks(String[] label, String[] due, String priority, String[] tag) throws Exception {
         FileNavigator fn = new FileNavigator(Qdo.FILENAME);
-        for (String line: fn.lines) {
+        String line = null;
+        while ((line = fn.readLine()) != null) {
             Task currentTask = Task.of(line);
             if (label != null) {
                 if (!currentTask.label.equals(Task.convertToString(label))) continue;
@@ -203,10 +204,12 @@ class List implements Runnable {
             if (Task.comparePriorities(currentTask.priority, priority) < 0) continue;
             if (tag != null){
                 String match = Task.convertToString(tag);
-                if (match.equals(currentTask.tag)) 
-                    System.out.println(currentTask.toStringWithColor());
+                if (match.equals(currentTask.tag)) {
+                    System.out.println(String.format("%d) %s", fn.lineNumber, currentTask.toStringWithColor()));
+                }
             }
-            else System.out.println(currentTask.toStringWithColor());
+            else 
+                System.out.println(String.format("%d) %s", fn.lineNumber, currentTask.toStringWithColor()));
             
         }
         fn.close();
@@ -220,14 +223,21 @@ class Remove implements Runnable {
     @Option(names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
     String[] labelOption;
 
-    @Parameters (paramLabel = "<task label>", arity = "1..*", description = "Label representing task (optional replacement for --label flag)")
+    @Parameters (paramLabel = "<task label>", arity = "0..*", description = "Label representing task (optional replacement for --label flag)")
     String[] labelParam;
+
+    @Option (names = {"--number", "-n", "--num", "--task-number"}, description = "Number of task to be removed. For example, qdo remove --number 5 will remove the 5th task from the list")
+    int taskNum;
 
     @Override
     public void run() {
         try{
-        String[] label = Qdo.getRequiredLabel(labelOption, labelParam, "remove");
-        removeTask(label); } catch (Exception e) {e.printStackTrace();}
+        String[] label = Qdo.getOptionalLabel(labelOption, labelParam, "remove");
+        if (label == null) {
+            removeTask(taskNum);
+        }
+        else
+            removeTask(label); } catch (Exception e) {e.printStackTrace();}
     }
 
     static void removeTask(String[] label) {
@@ -238,6 +248,22 @@ class Remove implements Runnable {
         }
         fn.close();
     }
+
+    /*
+     * remove 1-indexed lineNumberth task from to-do list
+     * throw exception if outside of range
+     */
+    static void removeTask(int lineNumber) throws Exception{
+        if (lineNumber == 0)
+            throw new Exception("Must specify label or line number of task to remove");
+        
+        FileNavigator fn = new FileNavigator(Qdo.FILENAME);
+        if (lineNumber < 0 || lineNumber > fn.size()) {
+            throw new Exception(String.format("Task number out of range. No task at postion %d", lineNumber));
+        }
+        fn.removeTask(lineNumber);
+        fn.close();
+    }
 }
 
 @Command(name = "modify", mixinStandardHelpOptions = true, description = "Modify aspects of task on to-do list")
@@ -246,7 +272,7 @@ class Modify implements Runnable {
     @Option(names = {"--label", "-l"}, arity="1..*", description = "Label representing task")
     String[] labelOption;
 
-    @Parameters (paramLabel = "<task label>", arity = "1..*", description = "Label representing task (optional replacement for --label flag)")
+    @Parameters (paramLabel = "<task label>", arity = "0..*", description = "Label representing task (optional replacement for --label flag)")
     String[] labelParam;
 
     @Option(names = {"-n", "--new-label"}, arity = "1..*", description = "New label to be changed to")

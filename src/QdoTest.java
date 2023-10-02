@@ -121,8 +121,8 @@ public class QdoTest {
         tag = null;
         listTasks(label, due, priority, tag);
         String result = outputStream.toString();
-        String expected = task1.toStringWithColor() + newline + task2.toStringWithColor() + newline + task3.toStringWithColor() + newline 
-                + task4.toStringWithColor() + newline + task5.toStringWithColor() + newline + task6.toStringWithColor() + newline;
+        String expected = "1) " + task1.toStringWithColor() + newline + "2) " + task2.toStringWithColor() + newline + "3) " + task3.toStringWithColor() + newline 
+                +"4) " +  task4.toStringWithColor() + newline +"5) " +  task5.toStringWithColor() + newline + "6) " + task6.toStringWithColor() + newline;
         assertEquals(expected, result);
         //System.err.println(result);
 
@@ -133,7 +133,7 @@ public class QdoTest {
         tag = null;
         listTasks(label, due, priority, tag);
         result = outputStream.toString();
-        expected += task1.toStringWithColor() + newline + task3.toStringWithColor() + newline;
+        expected += "1) " + task1.toStringWithColor() + newline + "3) " + task3.toStringWithColor() + newline;
         assertEquals(expected, result);
 
         // test tag
@@ -143,8 +143,8 @@ public class QdoTest {
         tag = new String[] {};
         listTasks(label, due, priority, tag);
         result = outputStream.toString();
-        expected += task1.toStringWithColor() + newline + task2.toStringWithColor() + newline + task3.toStringWithColor() + newline 
-                + task4.toStringWithColor() + newline + task5.toStringWithColor() + newline;
+        expected += "1) " + task1.toStringWithColor() + newline + "2) " + task2.toStringWithColor() + newline + "3) " + task3.toStringWithColor() + newline 
+                + "4) " + task4.toStringWithColor() + newline + "5) " + task5.toStringWithColor() + newline;
         assertEquals(expected, result);
 
         // test label
@@ -154,7 +154,7 @@ public class QdoTest {
         tag = null;
         listTasks(label, due, priority, tag);
         result = outputStream.toString();
-        expected += task4.toStringWithColor() + newline;
+        expected += "4) " + task4.toStringWithColor() + newline;
         assertEquals(expected, result);
     }
 
@@ -232,6 +232,16 @@ public class QdoTest {
         String result = filledTask.toString();
         String expected = "Task: label\n     Date: 01/02/2000\n     Time: 00:00" +
                 "\n     Priority: 0\n     Tag: tag\n     Description: description";
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testRemoveWithNum() throws Exception{
+        Remove.removeTask(6);
+        Remove.removeTask(3);
+        Remove.removeTask(1);
+        String result = readFile("tasks.txt");
+        String expected = line2 + "\n" + line4 + "\n" + line5 + "\n";
         assertEquals(expected, result);
     }
 

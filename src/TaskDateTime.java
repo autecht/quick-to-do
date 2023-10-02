@@ -77,13 +77,14 @@ public class TaskDateTime {
 
     /*
      * If properly formatted, returns String array with 0th element being date 
-     * and 1st element being time 
+     * in mm/dd/yyyy format and 1st element being time in hh:mm military time format
      */
     public static String[] checkFormat(String[] due) throws Exception {
         if (due == null) 
             return new String[] {null, null}; // no date or time
         String[] dateAndTime = new String[2];
-        if (due.length > 2) throw new Exception("Usage: --due <date> <time>");
+        if (due.length > 2) 
+            throw new Exception("Usage: --due <date> <time>");
         dateAndTime[0] = convertToDate(due[0]);
 
         if (due.length == 2) dateAndTime[1] = convertToTime(due[1]);
