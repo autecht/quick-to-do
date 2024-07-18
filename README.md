@@ -1,5 +1,5 @@
 # Quick To-Do
-Quick To-Do is a easily understandable command-line application designed to allow the user to add, remove, and modify tasks on a to-do list with the details they choose to include.
+Quick To-Do is an easily understandable command-line application designed to allow the user to add, remove, and modify tasks on a to-do list with the details they choose to include.
 With multiple organizational flags, Quick To-Do allows the user to customize their experience. The application uses picocli to process commands and provide helpful feedback. 
 A local file stores tasks in the to-do list when the task is not running. Qdo uses the date, time, and 
 priority of tasks to organize them, search for them, and check whether they are due. It uses tags to search for them, 
